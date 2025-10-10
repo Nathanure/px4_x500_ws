@@ -1,0 +1,6 @@
+# Bridge configuration to convert Gazebo LIDAR to ROS2
+- ros_topic_name: "/scan"
+  gz_topic_name: "/world/walls/model/x500_lidar_2d_0/link/link/sensor/lidar_2d_v2/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS

@@ -1,0 +1,38 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${workspaceFolder}/.vscode/browse.vc.db",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/nathanca/ros2_ws/install/scanmatcher/include/**",
+        "/home/nathanca/ros2_ws/install/graph_based_slam/include/**",
+        "/home/nathanca/ros2_ws/install/ndt_omp_ros2/include/**",
+        "/home/nathanca/ros2_ws/install/my_robot_interfaces/include/**",
+        "/home/nathanca/ros2_ws/install/lidarslam_msgs/include/**",
+        "/home/nathanca/px4_x500_ws/install/px4_ros_com/include/**",
+        "/home/nathanca/px4_x500_ws/install/px4_msgs/include/**",
+        "/home/nathanca/mobile_robots_playground/install/tracked_vehicle_interfaces/include/**",
+        "/home/nathanca/mobile_robots_playground/install/scanmatcher/include/**",
+        "/home/nathanca/mobile_robots_playground/install/graph_based_slam/include/**",
+        "/home/nathanca/mobile_robots_playground/install/ndt_omp_ros2/include/**",
+        "/home/nathanca/mobile_robots_playground/install/lidarslam_msgs/include/**",
+        "/home/nathanca/turtlebot3_ws/install/turtlebot3_fake_node/include/**",
+        "/home/nathanca/turtlebot3_ws/install/turtlebot3_msgs/include/**",
+        "/home/nathanca/turtlebot3_ws/install/turtlebot3_gazebo/include/**",
+        "/home/nathanca/turtlebot3_ws/install/dynamixel_sdk_custom_interfaces/include/**",
+        "/home/nathanca/turtlebot3_ws/install/dynamixel_sdk/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/nathanca/px4_x500_ws/src/px4_ros_com/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ros2",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++17"
+    }
+  ],
+  "version": 4
+}
