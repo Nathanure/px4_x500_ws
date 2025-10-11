@@ -46,8 +46,7 @@ from px4_msgs.msg import TrajectorySetpoint
 from px4_msgs.msg import VehicleStatus
 from px4_msgs.msg import VehicleAttitude
 from px4_msgs.msg import VehicleCommand
-# from geometry_msgs.msg import Twist, Vector3
-from geometry_msgs.msg import Twist, Vector3, TwistStamped
+from geometry_msgs.msg import Twist, Vector3
 from math import pi
 from std_msgs.msg import Bool
 
@@ -102,7 +101,7 @@ class OffboardControl(Node):
         self.publisher_velocity = self.create_publisher(Twist, '/fmu/in/setpoint_velocity/cmd_vel_unstamped', qos_profile)
         self.publisher_trajectory = self.create_publisher(TrajectorySetpoint, trajectorySP, qos_profile)
         self.vehicle_command_publisher_ = self.create_publisher(VehicleCommand, vehicle_command, 10)
-        self.collision_avoidance_pub = self.create_publisher(TwistStamped, '/offboard/velocity_setpoint', qos_profile)
+
         
         #creates callback function for the arm timer
         # period is arbitrary, just should be more than 2Hz
@@ -268,17 +267,7 @@ class OffboardControl(Node):
             offboard_msg.position = False
             offboard_msg.velocity = True
             offboard_msg.acceleration = False
-            # self.publisher_offboard_mode.publish(offboard_msg)            
-
-            # Collision Avoidance
-            collision_msg = TwistStamped()
-            collision_msg.header.stamp = self.get_clock().now().to_msg()
-            collision_msg.header.frame_id = "base_link"
-            collision_msg.twist.linear.x = self.velocity.x
-            collision_msg.twist.linear.y = self.velocity.y
-            collision_msg.twist.linear.z = self.velocity.z
-            collision_msg.twist.angular.z = self.yaw
-            self.collision_avoidance_pub.publish(collision_msg)
+            self.publisher_offboard_mode.publish(offboard_msg)            
 
             # Compute velocity in the world frame
             cos_yaw = np.cos(self.trueYaw)
@@ -301,7 +290,7 @@ class OffboardControl(Node):
             trajectory_msg.yaw = float('nan')
             trajectory_msg.yawspeed = self.yaw
 
-            # self.publisher_trajectory.publish(trajectory_msg)
+            self.publisher_trajectory.publish(trajectory_msg)
 
 
 def main(args=None):

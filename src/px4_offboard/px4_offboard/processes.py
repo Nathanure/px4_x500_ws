@@ -14,7 +14,7 @@ commands = [
     "cd ~/PX4-Autopilot && make px4_sitl gz_x500_lidar_2d_walls",
 
     # Run QGroundControl
-    "cd ~/Downloads && ./QGroundControl-x86_64.AppImage"
+    "cd ~/Downloads && ./QGroundControl-x86_64.AppImage",
 ]
 
 # Loop through each command in the list
