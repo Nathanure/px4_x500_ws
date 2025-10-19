@@ -1,0 +1,18 @@
+/**:
+  ros__parameters:
+    cp_dist: 3.0          
+    cp_delay: 0.4
+    cp_guide_ang: 30.0
+    cp_go_no_data: false
+    
+    mpc_xy_p: 0.95
+    mpc_jerk_max: 8.0
+    mpc_acc_hor: 3.0
+    mpc_xy_vel_p_acc: 1.8
+    mpc_vel_manual: 10.0
+    
+    lidar_topic: '/scan'
+    sensor_frame: 'MAV_FRAME_BODY_FRD'
+    bin_count: 72
+    max_distance: 20.0
+    min_distance: 0.1
