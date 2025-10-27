@@ -136,22 +136,22 @@ def generate_launch_description():
         ),
         
         # Collision Prevention (reads PX4 obstacle data)
-        TimerAction(
-            period=3.5,
-            actions=[
-                Node(
-                    package='px4_offboard',
-                    namespace='px4_offboard',
-                    executable='collision_prevention',
-                    name='collision_prevention',
-                    parameters=[
-                        config_file,
-                        {'use_sim_time': True}
-                    ],
-                    output='screen'
-                )
-            ]
-        ),
+        # TimerAction(
+        #     period=3.5,
+        #     actions=[
+        #         Node(
+        #             package='px4_offboard',
+        #             namespace='px4_offboard',
+        #             executable='collision_prevention',
+        #             name='collision_prevention',
+        #             parameters=[
+        #                 config_file,
+        #                 {'use_sim_time': True}
+        #             ],
+        #             output='screen'
+        #         )
+        #     ]
+        # ),
         
         # Manual Control Input
         Node(

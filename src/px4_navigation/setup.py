@@ -38,7 +38,6 @@ setup(
     entry_points={
         'console_scripts': [
             'cmd_vel_bridge = px4_navigation.cmd_vel_bridge:main',
-            'odom_publisher = px4_navigation.odom_publisher:main',
         ],
     },
 )

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 TF Publisher for PX4 X500 with 2D LiDAR
-ROBUST: Publishes immediately regardless of clock state
+FIXED: Correct NED to ENU orientation conversion
 """
 
 import rclpy
@@ -66,13 +66,12 @@ class PX4TFPublisher(Node):
             use_sim = False
         
         self.get_logger().info('========================================')
-        self.get_logger().info('PX4 TF Publisher Started')
+        self.get_logger().info('PX4 TF Publisher Started (FIXED NED->ENU)')
         self.get_logger().info(f'use_sim_time: {use_sim}')
         self.get_logger().info('Publishing TF tree: odom -> base_footprint -> base_link -> sensor_links')
         self.get_logger().info('========================================')
         
         # Publish static transforms IMMEDIATELY
-        # This works because we use get_current_time() which handles both cases
         self.publish_static_transforms()
         self.get_logger().info('✓ Initial static transforms published')
         
@@ -86,30 +85,19 @@ class PX4TFPublisher(Node):
         self.status_timer = self.create_timer(5.0, self.print_status)
         
     def get_current_time(self):
-        """
-        Get current time that works with both sim time and wall time.
-        Returns the actual clock time, or None if not ready.
-        """
+        """Get current time that works with both sim time and wall time"""
         now = self.get_clock().now()
         
-        # For sim time, we need a valid non-zero timestamp
-        # But we should use the actual sim time once it starts
         if now.nanoseconds == 0:
-            # Clock not initialized yet - return None to skip publishing
             return None
         
         return now.to_msg()
     
     def get_static_time(self):
-        """
-        Get time for static transforms - can use fallback if needed.
-        """
+        """Get time for static transforms - can use fallback if needed"""
         now = self.get_clock().now()
         
-        # If time is zero (sim clock not started yet), use a valid non-zero time
-        # Static transforms can tolerate this
         if now.nanoseconds == 0:
-            # Return epoch + 1 second (valid but old timestamp)
             time_msg = Time()
             time_msg.sec = 1
             time_msg.nanosec = 0
@@ -131,7 +119,6 @@ class PX4TFPublisher(Node):
         else:
             status_parts.append('✗ Attitude')
         
-        # Check clock status
         now = self.get_clock().now()
         if now.nanoseconds > 0:
             status_parts.append(f'✓ Clock ({now.nanoseconds/1e9:.1f}s)')
@@ -148,7 +135,6 @@ class PX4TFPublisher(Node):
     def publish_static_transforms(self):
         """Publish static transforms for the robot structure"""
         
-        # Get current time (handles both sim and wall clock, with fallback)
         current_time = self.get_static_time()
         
         static_transforms = []
@@ -197,7 +183,6 @@ class PX4TFPublisher(Node):
         t.transform.rotation.w = 1.0
         static_transforms.append(t)
         
-        # Publish all static transforms
         self.static_tf_broadcaster.sendTransform(static_transforms)
         
     def position_callback(self, msg):
@@ -217,14 +202,11 @@ class PX4TFPublisher(Node):
     def publish_dynamic_transforms(self):
         """Publish dynamic transform from odom to base_footprint"""
         
-        # Need both position and attitude
         if self.current_position is None or self.current_attitude is None:
             return
         
-        # Get current time - must be valid for dynamic transforms
         current_time = self.get_current_time()
         
-        # Skip if clock not ready (returns None)
         if current_time is None:
             if not hasattr(self, '_clock_wait_logged'):
                 self._clock_wait_logged = True
@@ -238,16 +220,28 @@ class PX4TFPublisher(Node):
         t.child_frame_id = 'base_footprint'
         
         # Position (NED to ENU conversion)
-        t.transform.translation.x = self.current_position.y
-        t.transform.translation.y = self.current_position.x
-        t.transform.translation.z = -self.current_position.z
+        # PX4 NED: x=North, y=East, z=Down
+        # ROS ENU: x=East, y=North, z=Up
+        t.transform.translation.x = self.current_position.y   # East
+        t.transform.translation.y = self.current_position.x   # North
+        t.transform.translation.z = -self.current_position.z  # Up
         
-        # Orientation (NED to ENU conversion)
+        # FIXED: Orientation (NED to ENU conversion)
+        # PX4 quaternion format: [w, x, y, z]
         q = self.current_attitude.q
-        r_ned = Rotation.from_quat([q[1], q[2], q[3], q[0]])
-        r_ned_to_enu = Rotation.from_euler('z', 90, degrees=True)
-        r_enu = r_ned_to_enu * r_ned
-        q_enu = r_enu.as_quat()
+        q_ned = Rotation.from_quat([q[1], q[2], q[3], q[0]])  # Convert to [x,y,z,w] format
+        
+        # NED to ENU transformation matrix:
+        # ENU_X = NED_Y (East = PX4's East)
+        # ENU_Y = NED_X (North = PX4's North)
+        # ENU_Z = -NED_Z (Up = negative PX4's Down)
+        R_ned_to_enu = Rotation.from_matrix([
+            [0, 1, 0],   # ENU_X = NED_Y
+            [1, 0, 0],   # ENU_Y = NED_X
+            [0, 0, -1]   # ENU_Z = -NED_Z
+        ])
+        
+        q_enu = (R_ned_to_enu * q_ned).as_quat()  # Returns [x,y,z,w]
         
         t.transform.rotation.x = q_enu[0]
         t.transform.rotation.y = q_enu[1]
@@ -257,18 +251,17 @@ class PX4TFPublisher(Node):
         # Publish transform
         self.tf_broadcaster.sendTransform(t)
         
-        # Log only first time
         if not hasattr(self, '_dynamic_published'):
             self._dynamic_published = True
             clock_time = self.get_clock().now().nanoseconds / 1e9
             self.get_logger().info(f'✓ Publishing dynamic odom->base_footprint transform (clock={clock_time:.2f}s)')
+            self.get_logger().info('✓ NED to ENU conversion: Position and Orientation fixed!')
         
-        # Periodic logging to verify it's still publishing
         if not hasattr(self, '_dynamic_count'):
             self._dynamic_count = 0
         self._dynamic_count += 1
         
-        if self._dynamic_count % 250 == 0:  # Every 5 seconds at 50Hz
+        if self._dynamic_count % 250 == 0:
             self.get_logger().info(
                 f'Dynamic TF still publishing: {self._dynamic_count} frames sent',
                 throttle_duration_sec=5.0
