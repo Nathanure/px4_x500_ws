@@ -77,6 +77,7 @@ class OffboardControl(Node):
         
         self.offboard_velocity_sub = self.create_subscription(
             Twist,
+            # '/offboard_velocity_cmd',
             '/constrained_velocity_cmd',  # Changed from '/offboard_velocity_cmd'
             self.offboard_velocity_callback,
             qos_profile)

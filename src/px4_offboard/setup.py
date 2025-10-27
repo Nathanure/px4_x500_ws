@@ -31,7 +31,7 @@ setup(
             'velocity_control = px4_offboard.velocity_control:main',
             'control = px4_offboard.control:main',
             'processes = px4_offboard.processes:main',
-            'collision_prevention = px4_offboard.collision_prevention:main',
+            # 'collision_prevention = px4_offboard.collision_prevention:main',
             'lidar_bridge = px4_offboard.obstacle_distance:main',
             'tf_publisher = px4_offboard.tf_publisher:main',
             'odom_publisher = px4_offboard.odom_publisher:main',

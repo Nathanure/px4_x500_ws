@@ -14,6 +14,8 @@ from launch_ros.actions import Node, PushRosNamespace
 
 def generate_launch_description():
     # Paths
+    map_path = 'lidar_2d_walls'  # Specific map file for navigation
+
     nav2_bringup_dir = FindPackageShare('nav2_bringup')
     
     nav2_launch_path = PathJoinSubstitution(
@@ -34,21 +36,21 @@ def generate_launch_description():
         # Launch Arguments
         DeclareLaunchArgument(
             name='sim',
-            default_value='false',
+            default_value='True',
             description='Enable use_sim_time to true'
         ),
 
         DeclareLaunchArgument(
             name='map',
             default_value=PathJoinSubstitution(
-                [FindPackageShare('px4_navigation'), 'maps', 'map.yaml']
+                [FindPackageShare('px4_navigation'), 'maps', f'{map_path}.yaml']
             ),
             description='Full path to map yaml file'
         ),
 
         DeclareLaunchArgument(
             name='rviz',
-            default_value='true',
+            default_value='True',
             description='Run RViz2'
         ),
 
@@ -76,18 +78,6 @@ def generate_launch_description():
             description='Initial robot yaw'
         ),
 
-        # ============ TF Publisher Node (from px4_offboard) ============
-        # This publishes odom->base_link, base_link->sensors, and /odom topic
-        Node(
-            package='px4_offboard',
-            executable='tf_publisher',
-            name='tf_publisher',
-            output='screen',
-            parameters=[{
-                'use_sim_time': LaunchConfiguration('sim')
-            }]
-        ),
-
         # ============ Map Server ============
         Node(
             package='nav2_map_server',
@@ -100,6 +90,30 @@ def generate_launch_description():
             ]
         ),
 
+        # ============ AMCL (Localization) ============
+        # THIS IS THE KEY FIX - Pass initial pose parameters to AMCL
+        Node(
+            package='nav2_amcl',
+            executable='amcl',
+            name='amcl',
+            output='screen',
+            parameters=[
+                nav_config_path,
+                {
+                    'use_sim_time': LaunchConfiguration('sim'),
+                    'set_initial_pose': True,
+                    'initial_pose.x': LaunchConfiguration('initial_pose_x'),
+                    'initial_pose.y': LaunchConfiguration('initial_pose_y'),
+                    'initial_pose.z': 0.0,
+                    'initial_pose.yaw': LaunchConfiguration('initial_pose_yaw'),
+                }
+            ],
+            remappings=[
+                ('/tf', 'tf'),
+                ('/tf_static', 'tf_static')
+            ]
+        ),
+
         # ============ Lifecycle Manager for Map Server ============
         Node(
             package='nav2_lifecycle_manager',
@@ -109,22 +123,7 @@ def generate_launch_description():
             parameters=[
                 {'use_sim_time': LaunchConfiguration('sim')},
                 {'autostart': True},
-                {'node_names': ['map_server']}
-            ]
-        ),
-
-        # ============ AMCL (Localization) ============
-        Node(
-            package='nav2_amcl',
-            executable='amcl',
-            name='amcl',
-            output='screen',
-            parameters=[nav_config_path, {
-                'use_sim_time': LaunchConfiguration('sim')
-            }],
-            remappings=[
-                ('/tf', 'tf'),
-                ('/tf_static', 'tf_static')
+                {'node_names': ['map_server', 'amcl']}
             ]
         ),
 
@@ -134,9 +133,9 @@ def generate_launch_description():
             launch_arguments={
                 'use_sim_time': LaunchConfiguration('sim'),
                 'params_file': nav_config_path,
-                'autostart': 'true',
-                'use_composition': 'false',
-                'use_respawn': 'false',
+                'autostart': 'True',
+                'use_composition': 'False',
+                'use_respawn': 'False',
             }.items()
         ),
 
@@ -148,7 +147,8 @@ def generate_launch_description():
             name='cmd_vel_bridge',
             output='screen',
             parameters=[{
-                'use_sim_time': LaunchConfiguration('sim')
+                'use_sim_time': LaunchConfiguration('sim'),
+                'enable_bridge': True,
             }]
         ),
 
