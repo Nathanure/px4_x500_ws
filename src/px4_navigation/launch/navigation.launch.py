@@ -14,7 +14,8 @@ from launch_ros.actions import Node, PushRosNamespace
 
 def generate_launch_description():
     # Paths
-    map_path = 'lidar_2d_walls'  # Specific map file for navigation
+    # map_path = 'lidar_2d_walls'  # Specific map file for navigation
+    map_path = 'warehouse_map'  # Specific map file for navigation
 
     nav2_bringup_dir = FindPackageShare('nav2_bringup')
     

@@ -52,7 +52,8 @@ def generate_launch_description():
     config_file = os.path.join(package_dir, 'config', 'collision_prevention_params.yaml')
     
     # CONFIRMED working Gazebo topic from gz topic -l
-    gz_lidar_topic = '/world/walls/model/x500_lidar_2d_0/link/link/sensor/lidar_2d_v2/scan'
+    # gz_lidar_topic = '/world/walls/model/x500_lidar_2d_0/link/link/sensor/lidar_2d_v2/scan'
+    gz_lidar_topic = '/world/warehouse_v2/model/x500_lidar_2d_0/link/link/sensor/lidar_2d_v2/scan'
     
     return LaunchDescription([
         # FIXED: Use direct command-line arguments (NOT config file for bridge)

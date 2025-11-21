@@ -11,7 +11,17 @@ commands = [
     "MicroXRCEAgent udp4 -p 8888",
 
     # Run the PX4 SITL simulation
-    "cd ~/PX4-Autopilot && make px4_sitl gz_x500_lidar_2d_walls",
+
+    # x500 Quadcopter in Walls World
+    # "cd ~/PX4-Autopilot && make px4_sitl gz_x500_lidar_2d_walls",
+    
+    # x500 Quadcopter in Warehouse World
+    "cd ~/PX4-Autopilot && make px4_sitl gz_x500_lidar_2d_warehouse_v2",
+    
+    # x500 Quadcopter in Warehouse World with multiple drones
+    # "cd ~/PX4-Autopilot && PX4_SYS_AUTOSTART=4013 PX4_SIM_MODEL=gz_x500_lidar_2d PX4_GZ_WORLD=warehouse_v2 ./build/px4_sitl_default/bin/px4 -i 1",
+    # "cd ~/PX4-Autopilot && PX4_GZ_STANDALONE=1 PX4_SYS_AUTOSTART=4013 PX4_GZ_MODEL_POSE=\"0,1\" PX4_SIM_MODEL=gz_x500_lidar_2d PX4_GZ_WORLD=warehouse_v2 ./build/px4_sitl_default/bin/px4 -i 2",
+    # "cd ~/PX4-Autopilot && PX4_GZ_STANDALONE=1 PX4_SYS_AUTOSTART=4013 PX4_GZ_MODEL_POSE=\"0,2\" PX4_SIM_MODEL=gz_x500_lidar_2d PX4_GZ_WORLD=warehouse_v2 ./build/px4_sitl_default/bin/px4 -i 3",
 
     # Run QGroundControl
     "cd ~/Downloads && ./QGroundControl-x86_64.AppImage"
